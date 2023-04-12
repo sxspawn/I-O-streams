@@ -1,10 +1,6 @@
 package ru.kovbasa.streams;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 
 public class Basket {
@@ -47,26 +43,17 @@ public class Basket {
     }
 
     public void saveTxt(File file) {
-        PrintWriter out = null;
-        try {
-            out = new PrintWriter(file);
+        try (PrintWriter out = new PrintWriter(file)) {
             out.println(Arrays.toString(products));
             out.println(Arrays.toString(prices));
             out.println(Arrays.toString(productsQuantity));
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (out != null) {
-                out.close();
-            }
         }
     }
 
     public static Basket loadFromTxtFile(File file) {
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(file));
-
+        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String productsStr = prepareString(in.readLine());
             String pricesStr = prepareString(in.readLine());
             String productsQuantityStr = prepareString(in.readLine());
@@ -78,13 +65,6 @@ public class Basket {
             return new Basket(products, prices, productsQuantity);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e) {
-            }
         }
 
         return null;

@@ -12,6 +12,7 @@ public class Main {
         Basket basket;
         if (file.exists()) {
             basket = Basket.loadFromTxtFile(file);
+            assert basket != null;
             basket.printCart();
         } else {
             String[] products = {"Хлеб", "Яблоки", "Молоко", "Кефир", "Селедка"};
@@ -22,7 +23,6 @@ public class Main {
         basket.printProducts();
         System.out.println();
 
-        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
