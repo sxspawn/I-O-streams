@@ -1,13 +1,12 @@
 package ru.kovbasa.streams;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 
-public class Basket {
+public class Basket implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 4961751090262990205L;
 
     public String[] products;
     public int[] prices;
@@ -36,7 +35,7 @@ public class Basket {
             }
             sumCart += prices[i] * productsQuantity[i];
         }
-        System.out.println("Общая сумма: " + sumCart + " руб.\r\n");
+        System.out.println("Общая сумма: " + sumCart + " руб.\n");
     }
 
     public void printProducts() {
@@ -44,61 +43,32 @@ public class Basket {
         for (int i = 0; i < products.length; i++) {
             System.out.println((i + 1) + ". " + products[i] + " = " + prices[i] + " руб.");
         }
+        System.out.println();
     }
 
-    public void saveTxt(File file) {
-        PrintWriter out = null;
-        try {
-            out = new PrintWriter(file);
-            out.println(Arrays.toString(products));
-            out.println(Arrays.toString(prices));
-            out.println(Arrays.toString(productsQuantity));
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
-    public static Basket loadFromTxtFile(File file) {
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new FileReader(file));
-
-            String productsStr = prepareString(in.readLine());
-            String pricesStr = prepareString(in.readLine());
-            String productsQuantityStr = prepareString(in.readLine());
-
-            String[] products = Arrays.stream(productsStr.split(",")).map(String::trim).toArray(String[]::new);
-            int[] prices = Arrays.stream(pricesStr.split(",")).mapToInt(s -> Integer.parseInt(s.trim())).toArray();
-            int[] productsQuantity = Arrays.stream(productsQuantityStr.split(",")).mapToInt(s -> Integer.parseInt(s.trim())).toArray();
-
-            return new Basket(products, prices, productsQuantity);
+    public void saveBin(File file) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
+            outputStream.writeObject(this);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e) {
-            }
         }
-
-        return null;
     }
 
-    private static String prepareString(String str) {
-        if (str != null) {
-            str = str.trim();
-            if (!str.isEmpty() && str.charAt(0) == '[' && str.charAt(str.length() - 1) == ']') {
-                str = str.substring(1, str.length() - 1);
-            }
-            return str;
-        } else {
-            return "";
+    public static Basket loadFromBinFile(File file) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+            return (Basket) inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Basket:{" + "\n" +
+                "\tproducts: " + Arrays.toString(products) + "\n" +
+                "\tprices: " + Arrays.toString(prices) + "\n" +
+                "\tproductsQuantity: " + Arrays.toString(productsQuantity) + "\n" +
+                "}";
     }
 }

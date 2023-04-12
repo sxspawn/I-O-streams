@@ -7,11 +7,11 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Программа \"Потребительская корзина!\"\n");
-
-        File file = new File("basket.txt");
         Basket basket;
+        File file = new File("basket.bin");
         if (file.exists()) {
-            basket = Basket.loadFromTxtFile(file);
+            basket = Basket.loadFromBinFile(file);
+            assert basket != null;
             basket.printCart();
         } else {
             String[] products = {"Хлеб", "Яблоки", "Молоко", "Кефир", "Селедка"};
@@ -22,7 +22,6 @@ public class Main {
         basket.printProducts();
         System.out.println();
 
-        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -38,7 +37,7 @@ public class Main {
                 int productNumber = Integer.parseInt(parts[0]) - 1;
                 int productQuantity = Integer.parseInt(parts[1]);
                 basket.addToCart(productNumber, productQuantity);
-                basket.saveTxt(file);
+                basket.saveBin(file);
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 System.out.println("Неправильный формат ввода! \n");
             }
