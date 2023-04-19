@@ -1,18 +1,24 @@
 package ru.kovbasa.streams;
 
+import ru.kovbasa.streams.log.ClientLog;
+import ru.kovbasa.streams.storage.IStorage;
+import ru.kovbasa.streams.storage.JsonStorage;
+
 import java.io.File;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
+        ClientLog log = new ClientLog();
+        IStorage storage;
+        storage = new JsonStorage("basket.json");
+
         System.out.println("Программа \"Потребительская корзина!\"\n");
 
-        File file = new File("basket.txt");
         Basket basket;
-        if (file.exists()) {
-            basket = Basket.loadFromTxtFile(file);
-            assert basket != null;
+        if (storage.isStorageExists()) {
+            basket = storage.loadBasket();
             basket.printCart();
         } else {
             String[] products = {"Хлеб", "Яблоки", "Молоко", "Кефир", "Селедка"};
@@ -21,7 +27,6 @@ public class Main {
         }
 
         basket.printProducts();
-        System.out.println();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -38,12 +43,16 @@ public class Main {
                 int productNumber = Integer.parseInt(parts[0]) - 1;
                 int productQuantity = Integer.parseInt(parts[1]);
                 basket.addToCart(productNumber, productQuantity);
-                basket.saveTxt(file);
+                log.log(productNumber, productQuantity);
+                storage.saveBasket(basket);
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                System.out.println("Неправильный формат ввода! \n");
+                System.out.println("Неправильный формат ввода");
             }
         }
 
+        System.out.println();
         basket.printCart();
+
+        log.exportAsCSV(new File("log.csv"));
     }
 }
