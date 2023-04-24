@@ -1,6 +1,8 @@
 package ru.kovbasa.streams;
 
 import ru.kovbasa.streams.log.ClientLog;
+import ru.kovbasa.streams.settings.Settings;
+import ru.kovbasa.streams.settings.SettingsManager;
 import ru.kovbasa.streams.storage.IStorage;
 import ru.kovbasa.streams.storage.JsonStorage;
 
@@ -10,15 +12,19 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+        Settings settings = SettingsManager.loadSettings();
+        SettingsManager.saveSettings(settings);
+
         ClientLog log = new ClientLog();
-        IStorage storage;
-        storage = new JsonStorage("basket.json");
+
+        IStorage storageLoad = new JsonStorage(settings.getLoadFileName());
+        IStorage storageSave = new JsonStorage(settings.getSaveFileName());
 
         System.out.println("Программа \"Потребительская корзина!\"\n");
 
         Basket basket;
-        if (storage.isStorageExists()) {
-            basket = storage.loadBasket();
+        if (settings.isLoadEnabled() && storageLoad.isStorageExists()) {
+            basket = storageLoad.loadBasket();
             basket.printCart();
         } else {
             String[] products = {"Хлеб", "Яблоки", "Молоко", "Кефир", "Селедка"};
@@ -28,6 +34,7 @@ public class Main {
 
         basket.printProducts();
 
+        @SuppressWarnings("resource")
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -44,7 +51,9 @@ public class Main {
                 int productQuantity = Integer.parseInt(parts[1]);
                 basket.addToCart(productNumber, productQuantity);
                 log.log(productNumber, productQuantity);
-                storage.saveBasket(basket);
+                if (settings.isSaveEnabled()) {
+                    storageSave.saveBasket(basket);
+                }
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 System.out.println("Неправильный формат ввода");
             }
@@ -53,6 +62,8 @@ public class Main {
         System.out.println();
         basket.printCart();
 
-        log.exportAsCSV(new File("log.csv"));
+        if (settings.isLogEnabled()) {
+            log.exportAsCSV(new File(settings.getLogFileName()));
+        }
     }
 }
