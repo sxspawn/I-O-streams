@@ -1,3 +1,5 @@
 /.idea/
 /out/
 /basket.txt
+/basket.json
+/log.csv

@@ -1,9 +1,11 @@
 package ru.kovbasa.streams;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Basket {
+public class Basket implements Serializable {
+
+    private static final long serialVersionUID = 4961751090262990205L;
 
     public String[] products;
     public int[] prices;
@@ -23,16 +25,28 @@ public class Basket {
         productsQuantity[productNum] += amount;
     }
 
+    public String[] getProducts() {
+        return products;
+    }
+
+    public int[] getPrices() {
+        return prices;
+    }
+
+    public int[] getProductsQuantity() {
+        return productsQuantity;
+    }
+
     public void printCart() {
         int sumCart = 0;
-        System.out.println("\nВаша корзина: ");
+        System.out.println("Ваша корзина: ");
         for (int i = 0; i < productsQuantity.length; i++) {
             if (productsQuantity[i] > 0) {
                 System.out.println(products[i] + " - " + prices[i] + " руб.шт. * " + productsQuantity[i] + " шт. = " + (prices[i] * productsQuantity[i]) + " руб.");
             }
             sumCart += prices[i] * productsQuantity[i];
         }
-        System.out.println("Общая сумма: " + sumCart + " руб.\r\n");
+        System.out.println("Общая сумма: " + sumCart + " руб.\n");
     }
 
     public void printProducts() {
@@ -40,45 +54,15 @@ public class Basket {
         for (int i = 0; i < products.length; i++) {
             System.out.println((i + 1) + ". " + products[i] + " = " + prices[i] + " руб.");
         }
+        System.out.println();
     }
 
-    public void saveTxt(File file) {
-        try (PrintWriter out = new PrintWriter(file)) {
-            out.println(Arrays.toString(products));
-            out.println(Arrays.toString(prices));
-            out.println(Arrays.toString(productsQuantity));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static Basket loadFromTxtFile(File file) {
-        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            String productsStr = prepareString(in.readLine());
-            String pricesStr = prepareString(in.readLine());
-            String productsQuantityStr = prepareString(in.readLine());
-
-            String[] products = Arrays.stream(productsStr.split(",")).map(String::trim).toArray(String[]::new);
-            int[] prices = Arrays.stream(pricesStr.split(",")).mapToInt(s -> Integer.parseInt(s.trim())).toArray();
-            int[] productsQuantity = Arrays.stream(productsQuantityStr.split(",")).mapToInt(s -> Integer.parseInt(s.trim())).toArray();
-
-            return new Basket(products, prices, productsQuantity);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private static String prepareString(String str) {
-        if (str != null) {
-            str = str.trim();
-            if (!str.isEmpty() && str.charAt(0) == '[' && str.charAt(str.length() - 1) == ']') {
-                str = str.substring(1, str.length() - 1);
-            }
-            return str;
-        } else {
-            return "";
-        }
+    @Override
+    public String toString() {
+        return "Basket:{" + "\n" +
+                "\tproducts: " + Arrays.toString(products) + "\n" +
+                "\tprices: " + Arrays.toString(prices) + "\n" +
+                "\tproductsQuantity: " + Arrays.toString(productsQuantity) + "\n" +
+                "}";
     }
 }
